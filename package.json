@@ -77,7 +77,7 @@
   },
   "dependencies": {
     "animejs": "^3.0.1",
-    "coffeekraken-sugar": "^1.0.58"
+    "coffeekraken-sugar": "^1.0.59"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",

@@ -1,15 +1,15 @@
-@import 'node_modules/coffeekraken-sugar/index';
-@import '../../../index';
+@import "node_modules/coffeekraken-sugar/index";
+@import "../../../index";
 
 @include s-setup(());
 @include s-init();
 @include s-classes();
 
 body {
-	padding: s-space(bigger);
+  padding: s-space(bigger);
 }
 
 s-donut {
-  width: 200px;
-  height: 200px;
+  width: 30vw;
+  // height: 200px;
 }

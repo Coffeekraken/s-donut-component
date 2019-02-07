@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<link rel="stylesheet" href="dist/css/style.css" />
-</head>
-<body>
+  <head>
+    <link rel="stylesheet" href="dist/css/style.css" />
+  </head>
+  <body>
+    <s-donut segments="[{name:'default',start:0,end:90}]"></s-donut>
 
-  <s-donut segments="[{name:'default',start:0,end:45}]"></s-donut>
+    <s-donut
+      cascade
+      stroke-width="50"
+      animation-duration="500"
+      segments="[{name:'default',start:0,end:60,color:'#ff0f00'}, {name:'master',start:60,end:100,color:'#000ff0'}]"
+    ></s-donut>
 
-  <s-donut></s-donut>
-
-	<script src="dist/js/app.js"></script>
-</body>
+    <script src="dist/js/app.js"></script>
+  </body>
 </html>

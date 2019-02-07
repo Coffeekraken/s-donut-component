@@ -1,5 +1,6 @@
 import SWebComponent from "coffeekraken-sugar/js/core/SWebComponent"
-import style from "coffeekraken-sugar/js/dom/style"
+import addEventListener from "coffeekraken-sugar/js/dom/addEventListener"
+import nodeIndex from "coffeekraken-sugar/js/dom/nodeIndex"
 import anime from "animejs"
 
 export default class SDonutComponent extends SWebComponent {
@@ -36,14 +37,21 @@ export default class SDonutComponent extends SWebComponent {
        * @prop
        * @type    {Integer}
        */
-      animationDuration: 1200,
+      animationDuration: 1000,
 
       /**
        * Specify the animation easing for the segment. Can be any [animejs](https://animejs.com/documentation/#pennerFunctions) easing
        * @prop
        * @type    {String}
        */
-      animationEasing: "easeInOutExpo"
+      animationEasing: "easeInOutExpo",
+
+      /**
+       * Specify if the animation of segments has to be in cascade or all at the same time
+       * @prop
+       * @type    {Boolean}
+       */
+      cascade: false
     }
   }
 
@@ -94,20 +102,20 @@ export default class SDonutComponent extends SWebComponent {
     // loop on segments passed through the props
     this.props.segments.forEach(segment => {
       this.addSegment(
-        segment.name,
         segment.start,
         segment.end,
         segment.color,
+        segment.name,
         segment.animate
       )
     })
 
-    // this.addSegment("default", "red", 10, 50)
-    // this.addSegment("more", "blue", 0, 10)
-
-    // setTimeout(() => {
-    //   this.addSegment("more1", "yellow", 40, 85, false)
-    // }, 2000)
+    // listen for resize
+    this._removeResizeHandler = addEventListener(
+      window,
+      "resize",
+      this._removeResizeHandler.bind(this)
+    )
   }
 
   /**
@@ -117,6 +125,8 @@ export default class SDonutComponent extends SWebComponent {
    */
   componentUnmount() {
     super.componentUnmount()
+
+    if (this._removeResizeHandler) this._removeResizeHandler()
   }
 
   /**
@@ -130,27 +140,30 @@ export default class SDonutComponent extends SWebComponent {
 
   /**
    * Add a segment
-   * @param    {String}    name    A name for my segment. No special characters here...
    * @param    {Integer}    start    The start percentage for my segment
    * @param    {Integet}    end    The end percentage for my segment
    * @param    {String}    [color=currentColor]    A color for my segment. Ex: #ff0000
+   * @param    {String}    [name="default"]    A name for my segment. No special characters here...
    * @param    {Boolean}    [animate=true]    If want the segment to be animated
    */
-  addSegment(name, start, end, color = "currentColor", animate = true) {
+  addSegment(
+    start,
+    end,
+    color = "currentColor",
+    name = "default",
+    animate = true
+  ) {
     const offset = 25 + start * -1
     const dashArray0 = 0
     const dashArray1 = 100 - dashArray0
 
-    // calculate the ratio of original size (42x42) to actual size
-    const sizeRatio = 42 / this.offsetWidth
-
-    // calculate the stroke width depending on the size ratio
-    const strokeWidth = this.props.strokeWidth * sizeRatio
+    // get the stroke width interpolated from the size of the donut
+    const strokeWidth = this.getStrokeWidth()
 
     // create the segment element
     const $segment = document.createElement("circle")
-    $segment.setAttribute("cx", 21)
-    $segment.setAttribute("cy", 21)
+    $segment.setAttribute("cx", 16 + strokeWidth / 2)
+    $segment.setAttribute("cy", 16 + strokeWidth / 2)
     $segment.setAttribute("r", 15.91549430918952)
     $segment.setAttribute("fill", "transparent")
     $segment.setAttribute("stroke", color)
@@ -164,46 +177,68 @@ export default class SDonutComponent extends SWebComponent {
     this._$svg.appendChild($segment)
 
     // set the segment value
-    this.setSegmentValues(name, start, end, animate)
+    this.setSegmentValues(start, end, name)
   }
 
   /**
    * Set a segment animate value
-   * @param    {String}   name    The name of the segment to update
    * @param    {Boolean}    animate    If want to animate the segment or not
+   * @param    {String}   [name="default"]    The name of the segment to update
    * @return    {SDonutComponent}    The component itself to maintain chainability
    */
-  setSegmentAnimate(name, animate) {
+  setSegmentAnimate(animate, name = "default") {
     // get the segment
     const $segment = this.getSegmentByName(name)
     // set the animate parameter
     $segment.setAttribute("animate", animate)
+    // maintain chainability
+    return this
+  }
+
+  /**
+   * Set a segment stroke width value
+   * @param    {Boolean}    width    The new stroke width to apply to the segment
+   * @param    {String}   [name="default"]    The name of the segment to update
+   * @return    {SDonutComponent}    The component itself to maintain chainability
+   */
+  setSegmentStrokeWidth(width, name = "default") {
+    // get the segment
+    const $segment = this.getSegmentByName(name)
+    // set the animate parameter
+    $segment.setAttribute("stroke-width", width)
+    $segment.setAttribute("cx", 16 + width / 2)
+    $segment.setAttribute("cy", 16 + width / 2)
+    // fix draw
+    this._updateSvgFix()
+    // maintain chainability
+    return this
   }
 
   /**
    * Set a segment color
-   * @param    {String}   name    The name of the segment to update
    * @param    {String}    color    THe color to apply
+   * @param    {String}   [name="default"]    The name of the segment to update
    * @return    {SDonutComponent}    The component itself to maintain chainability
    */
-  setSegmentColor(name, color) {
+  setSegmentColor(color, name = "default") {
     // get the segment
     const $segment = this.getSegmentByName(name)
     // set the stroke color
     $segment.setAttribute("stroke", color)
     // update the svg
     this._updateSvgFix()
+    // maintain chainability
+    return this
   }
 
   /**
    * Set the segment value
-   * @param    {String}    name    The name of the segment to update
    * @param    {Integer}    start    The start value of the segment
    * @param    {Integer}    end    The end value of the segment
-   * @param    {Boolean}    [animate=true]    true if want the animation, false if not
+   * @param    {String}    [name="default"]    The name of the segment to update
    * @return    {SDonutComponent}    The component itself to maintain chainability
    */
-  setSegmentValues(name, start, end) {
+  setSegmentValues(start, end, name = "default") {
     const offset = 25 + start * -1
     const dashArray0 = end - start
     const dashArray1 = 100 - dashArray0
@@ -218,6 +253,9 @@ export default class SDonutComponent extends SWebComponent {
     const dashArrayAttr = $segment.getAttribute("stroke-dasharray")
     const dashOffsetAttr = $segment.getAttribute("stroke-dashoffset")
 
+    // get the index of the $segment inside the svg
+    const indexInSvg = nodeIndex($segment)
+
     // construct the initial obj to animate
     const obj = {
       dashArray0: parseInt(dashArrayAttr ? dashArrayAttr.split(" ")[0] : 0),
@@ -231,6 +269,9 @@ export default class SDonutComponent extends SWebComponent {
         offset,
         dashArray0,
         dashArray1,
+        delay: this.props.cascade
+          ? indexInSvg * this.props.animationDuration
+          : 0,
         duration: this.props.animationDuration,
         easing: this.props.animationEasing,
         update: () => {
@@ -268,6 +309,38 @@ export default class SDonutComponent extends SWebComponent {
   }
 
   /**
+   * Get the stroke width depending on the size of the donut
+   * @return    {Number}    The stroke width
+   */
+  getStrokeWidth() {
+    const sizeRatio = 32 / this.offsetWidth
+    return this.props.strokeWidth * sizeRatio
+  }
+
+  /**
+   * Resize handler
+   * @param    {Event}    e    The resize event
+   */
+  _removeResizeHandler(e) {
+    // calculate new stroke width
+    const strokeWidth = this.getStrokeWidth()
+    // loop on each segments
+    Array.from(this.querySelectorAll("circle[name]"), $segment => {
+      // get the name
+      const segmentName = $segment.getAttribute("name")
+      // apply new stroke width
+      this.setSegmentStrokeWidth(segmentName, strokeWidth)
+    })
+    // apply the new viewport
+    this._$svg.setAttribute(
+      "viewBox",
+      `0 0 ${32 + strokeWidth} ${32 + strokeWidth}`
+    )
+    // fix the render
+    // this._updateSvgFix()
+  }
+
+  /**
    * Ugly fix to update the svg render
    */
   _updateSvgFix() {
@@ -278,8 +351,10 @@ export default class SDonutComponent extends SWebComponent {
    * Create the HTML structure
    */
   _createHtml() {
+    const strokeWidth = this.getStrokeWidth()
     const svg = `
-      <svg width="100%" height="100%" viewBox="0 0 42 42" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"></svg>
+      <svg width="100%" height="100%" viewBox="0 0 ${32 + strokeWidth} ${32 +
+      strokeWidth}" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"></svg>
     `
     this.innerHTML = svg
 
