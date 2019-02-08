@@ -1,12 +1,12 @@
 {
-  "name": "coffeekraken-s-component-name-component",
+  "name": "coffeekraken-s-donut-component",
   "version": "1.0.0",
-  "description": "component-description",
+  "description": "Create with ease some nice fully customizable donut charts",
   "main": "dist/index.js",
   "homepage": "http://coffeekraken.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/coffeekraken/s-{component-name}-component"
+    "url": "https://github.com/coffeekraken/s-donut-component"
   },
   "watch": {
     "doc:js": {
@@ -50,6 +50,7 @@
     "lint"
   ],
   "keywords": [
+    "donut",
     "webcomponent",
     "component",
     "html",
@@ -105,6 +106,7 @@
     "babel-loader": "^8.0.0",
     "coffeekraken-code-playground": "^1.0.19",
     "coffeekraken-docblock-to-markdown": "^1.0.0",
+    "coffeekraken-s-characters-slideshow-component": "^1.0.2",
     "coffeekraken-s-typography-component": "^1.0.2",
     "coffeekraken-scripts-stack": "^1.0.3",
     "eslint": "^5.13.0",
