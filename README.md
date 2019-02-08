@@ -1,56 +1,57 @@
-# Coffeekraken s-{component-name}-component <img src=".resources/coffeekraken-logo.jpg" height="25px" />
+# Coffeekraken s-donut-component <img src=".resources/coffeekraken-logo.jpg" height="25px" />
 
 <p>
-	<!-- <a href="https://travis-ci.org/{repository-path}">
-		<img src="https://img.shields.io/travis/{repository-path}.svg?style=flat-square" />
+	<!-- <a href="https://travis-ci.org/coffeekraken/s-donut-component">
+		<img src="https://img.shields.io/travis/coffeekraken/s-donut-component.svg?style=flat-square" />
 	</a> -->
-	<a href="https://www.npmjs.com/package/{npm-package-name}">
-		<img src="https://img.shields.io/npm/v/{npm-package-name}.svg?style=flat-square" />
+	<a href="https://www.npmjs.com/package/coffeekraken-s-donut-component">
+		<img src="https://img.shields.io/npm/v/coffeekraken-s-donut-component.svg?style=flat-square" />
 	</a>
-	<a href="https://github.com/{repository-path}/blob/master/LICENSE.txt">
-		<img src="https://img.shields.io/npm/l/{npm-package-name}.svg?style=flat-square" />
+	<a href="https://github.com/coffeekraken/s-donut-component/blob/master/LICENSE.txt">
+		<img src="https://img.shields.io/npm/l/coffeekraken-s-donut-component.svg?style=flat-square" />
 	</a>
-	<!-- <a href="https://github.com/{repository-path}">
-		<img src="https://img.shields.io/npm/dt/{npm-package-name}.svg?style=flat-square" />
+	<!-- <a href="https://github.com/coffeekraken/s-donut-component">
+		<img src="https://img.shields.io/npm/dt/coffeekraken-s-donut-component.svg?style=flat-square" />
 	</a>
-	<a href="https://github.com/{repository-path}">
-		<img src="https://img.shields.io/github/forks/{repository-path}.svg?style=social&label=Fork&style=flat-square" />
+	<a href="https://github.com/coffeekraken/s-donut-component">
+		<img src="https://img.shields.io/github/forks/coffeekraken/s-donut-component.svg?style=social&label=Fork&style=flat-square" />
 	</a>
-	<a href="https://github.com/{repository-path}">
-		<img src="https://img.shields.io/github/stars/{repository-path}.svg?style=social&label=Star&style=flat-square" />
+	<a href="https://github.com/coffeekraken/s-donut-component">
+		<img src="https://img.shields.io/github/stars/coffeekraken/s-donut-component.svg?style=social&label=Star&style=flat-square" />
 	</a> -->
-	<a href="https://twitter.com/{twitter-username}">
-		<img src="https://img.shields.io/twitter/url/http/{twitter-username}.svg?style=social&style=flat-square" />
+	<a href="https://twitter.com/coffeekrakenio">
+		<img src="https://img.shields.io/twitter/url/http/coffeekrakenio.svg?style=social&style=flat-square" />
 	</a>
 	<a href="http://coffeekraken.io">
 		<img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=flat-square&label=coffeekraken.io&colorB=f2bc2b&style=flat-square" />
 	</a>
 </p>
 
-<p class="lead">{component-description}</p>
+<p class="lead">Create with ease some nice fully customizable donut charts</p>
 
-[![View demo](http://components.coffeekraken.io/assets/img/view-demo.png)](http://components.coffeekraken.io/app/{component-name}-component)
+[![View demo](http://components.coffeekraken.io/assets/img/view-demo.png)](http://components.coffeekraken.io/app/s-donut-component)
 
 ## Table of content
 
-1. **[Demo](http://components.coffeekraken.io/app/s-{component-name}-component)**
+1. **[Demo](http://components.coffeekraken.io/app/s-donut-component)**
 2. [Install](#readme-install)
 3. [Get Started](#readme-get-started)
-4. [Javascript API](doc/js)
-5. [SASS API](doc/sass)
-6. [Sugar Web Components Documentation](https://github.com/coffeekraken/sugar/blob/master/doc/webcomponent.md)
-7. [Browsers support](#readme-browsers-support)
-8. [Code linting](#readme-code-linting)
-9. [Contribute](#readme-contribute)
-10. [Who are Coffeekraken?](#readme-who-are-coffeekraken)
-11. [Licence](#readme-license)
+4. [Segments](#readme-segments)
+5. [API](#readme-api)
+6. [Javascript API](doc/js)
+7. [Sugar Web Components Documentation](https://github.com/coffeekraken/sugar/blob/master/doc/webcomponent.md)
+8. [Browsers support](#readme-browsers-support)
+9. [Code linting](#readme-code-linting)
+10. [Contribute](#readme-contribute)
+11. [Who are Coffeekraken?](#readme-who-are-coffeekraken)
+12. [Licence](#readme-license)
 
 <a name="readme-install"></a>
 
 ## Install
 
 ```
-npm install coffeekraken-s-{component-name}-component --save
+npm install coffeekraken-s-donut-component --save
 ```
 
 <a name="readme-get-started"></a>
@@ -60,14 +61,67 @@ npm install coffeekraken-s-{component-name}-component --save
 First, import the component into your javascript file like so:
 
 ```js
-import ComponentName from "coffeekraken-s-{component-name}-component"
+import SDonutComponent from "coffeekraken-s-donut-component"
 ```
 
 Then simply use it inside your html like so:
 
 ```html
-<s-{component-name}></s-{component-name}>
+<s-donut segments="[{start:0,end:60}]">
+  <span class="anything-you-want">60%</span>
+  <!-- anything you want here... -->
+</s-donut>
 ```
+
+<a id="readme-segments"></a>
+## Segments
+
+The main principle of this webcomponent are the segments. You can register multiple segments by donut. Each segments can/must have:
+
+- `name`: **required** A name for the segment. Used in some api function
+- `start`: **required** The start value of the segment between 0 and 100
+- `end`: **required** The end value of the segment between 0 and 100
+- `color`: **optional** The color for the segment. Otherwise it will be `currentColor`
+- `animate`: **optional** If want the segment to be animated of not. Default `true`
+
+To define a segment for a donut, use the `segments` property like so:
+
+```html
+<s-donut segments="[{name:'1',start:0,end:30},{name:'2',start:30,end:70,color:'#ff0000'}]"></s-donut>
+```
+
+<a id="readme-api"></a>
+## API
+
+Each donut comes with his own API. Here's the functions available:
+
+### `addSegment(start, end, color="currentColor", name="default", animate=true): SDonutComponent`
+
+Add a segment to the donut.
+
+### `setSegmentAnimate(animate, name="default"): SDonutComponent`
+
+Specify if the provided segment need to be animated or not
+
+### `setSegmentOpacity(opacity, name="default"): SDonutComponent`
+
+Specify the provided segment opacity
+
+### `setSegmentStrokeWidth(width, name="default"): SDonutComponent`
+
+Specify the provided segment stroke width
+
+### `setSegmentColor(color, name="default"): SDonutComponent`
+
+Specify the provided segment color
+
+### `setSegmentValues(start, end, name="default"): SDonutComponent`
+
+Specify the provided segment values
+
+### `getSegmentByName(name): SVGCircleElement`
+
+Return the `circle` element representing the segment
 
 <a id="readme-browsers-support"></a>
 

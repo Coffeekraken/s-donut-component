@@ -1,5 +1,4 @@
 @import "node_modules/coffeekraken-sugar/index";
-@import "../../../index";
 
 @include s-setup(());
 @include s-init();
@@ -8,8 +7,20 @@
 body {
   padding: s-space(bigger);
 }
-
 s-donut {
-  width: 30vw;
-  // height: 200px;
+  width: s-rem(250px);
+  margin: s-space(default);
 }
+#donut1 {
+  color: s-color(default)
+}
+#donut2 {
+  color: s-color(primary)
+}
+#donut3 {
+  color: s-color(secondary)
+}
+  .donut__value {
+    font-size: s-rem(60px);
+    display: block;
+  }

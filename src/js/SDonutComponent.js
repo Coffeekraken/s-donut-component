@@ -1,8 +1,21 @@
 import SWebComponent from "coffeekraken-sugar/js/core/SWebComponent"
 import addEventListener from "coffeekraken-sugar/js/dom/addEventListener"
 import nodeIndex from "coffeekraken-sugar/js/dom/nodeIndex"
+import strToHtml from "coffeekraken-sugar/js/utils/strings/strToHtml"
+import wrapInner from "coffeekraken-sugar/js/dom/wrapInner"
 import anime from "animejs"
 
+/**
+ * Create with ease some nice fully customizable donut charts
+ *
+ * @example    html
+ * <s-donut segments="[{start:0,end:60}]">
+ *   <span class="anything-you-want">60%</span>
+ *   <!-- anything you want here... -->
+ * </s-donut>
+ *
+ * @author    Olivier Bossel <olivier.bossel@gmail.com> (https://olivierbossel.com)
+ */
 export default class SDonutComponent extends SWebComponent {
   /**
    * Default props
@@ -51,7 +64,21 @@ export default class SDonutComponent extends SWebComponent {
        * @prop
        * @type    {Boolean}
        */
-      cascade: false
+      cascade: false,
+
+      /**
+       * Color of the base segment. If not specified, will be "currentColor"
+       * @prop
+       * @type    {String}
+       */
+      baseColor: null,
+
+      /**
+       * Specify the base segment opacity
+       * @prop
+       * @type    {Number}
+       */
+      baseOpacity: 0.1
     }
   }
 
@@ -72,6 +99,13 @@ export default class SDonutComponent extends SWebComponent {
     return `
       ${componentNameDash} {
         display: inline-block;
+        position: relative;
+      }
+      .${componentNameDash}__content {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        text-align: center;
       }
     `
   }
@@ -83,9 +117,6 @@ export default class SDonutComponent extends SWebComponent {
    */
   componentWillMount() {
     super.componentWillMount()
-
-    // internal variables
-    this._$segments = {}
   }
 
   /**
@@ -99,22 +130,19 @@ export default class SDonutComponent extends SWebComponent {
     // create the html structure
     this._createHtml()
 
-    // loop on segments passed through the props
-    this.props.segments.forEach(segment => {
-      this.addSegment(
-        segment.start,
-        segment.end,
-        segment.color,
-        segment.name,
-        segment.animate
-      )
-    })
+    // add base segment
+    const baseColor = this.props.baseColor || "currentColor"
+    this.addSegment(0, 100, baseColor, "base", false)
+    this.setSegmentOpacity(this.props.baseOpacity, "base")
+
+    // add the segments found in the segments prop
+    this.addSegments(this.props.segments)
 
     // listen for resize
     this._removeResizeHandler = addEventListener(
       window,
       "resize",
-      this._removeResizeHandler.bind(this)
+      this._resizeHandler.bind(this)
     )
   }
 
@@ -136,6 +164,56 @@ export default class SDonutComponent extends SWebComponent {
    */
   componentWillReceiveProp(name, newVal, oldVal) {
     super.componentWillReceiveProp(name, newVal, oldVal)
+
+    switch (name) {
+      case "strokeWidth":
+        // loop on each segments
+        Array.from(this.querySelectorAll("circle[name]"), $segment => {
+          // get the name
+          const segmentName = $segment.getAttribute("name")
+          // get the stroke width
+          const strokeWidth = this._getStrokeWidth(newVal)
+          // apply new stroke width
+          this.setSegmentStrokeWidth(strokeWidth, segmentName)
+        })
+        break
+      case "baseColor":
+        // set base segment color
+        this.setSegmentColor(newVal, "base")
+        break
+      case "baseOpacity":
+        // set base segment opacity
+        this.setSegmentOpacity(newVal, "base")
+        break
+      case "segments":
+        // remove all the existing segments
+        Array.from(this.querySelectorAll("circle[name]"), $segment => {
+          $segment.remove()
+        })
+        // loop on each new segments
+        if (!newVal) return
+        // add the new segments
+        this.addSegments(newVal)
+        break
+      default:
+    }
+  }
+
+  /**
+   * Add some segments
+   * @param    {Array<Object>}    segments    The segments to add
+   * @return    {SDonutComponent}    The component itself to maintain chainability
+   */
+  addSegments(segments) {
+    segments.forEach(segment => {
+      this.addSegment(
+        segment.start,
+        segment.end,
+        segment.color,
+        segment.name,
+        segment.animate
+      )
+    })
   }
 
   /**
@@ -145,6 +223,7 @@ export default class SDonutComponent extends SWebComponent {
    * @param    {String}    [color=currentColor]    A color for my segment. Ex: #ff0000
    * @param    {String}    [name="default"]    A name for my segment. No special characters here...
    * @param    {Boolean}    [animate=true]    If want the segment to be animated
+   * @return    {SDonutComponent}    The component itself to maintain chainability
    */
   addSegment(
     start,
@@ -158,7 +237,7 @@ export default class SDonutComponent extends SWebComponent {
     const dashArray1 = 100 - dashArray0
 
     // get the stroke width interpolated from the size of the donut
-    const strokeWidth = this.getStrokeWidth()
+    const strokeWidth = this._getStrokeWidth()
 
     // create the segment element
     const $segment = document.createElement("circle")
@@ -178,6 +257,9 @@ export default class SDonutComponent extends SWebComponent {
 
     // set the segment value
     this.setSegmentValues(start, end, name)
+
+    // return this to maintain chainability
+    return this
   }
 
   /**
@@ -191,6 +273,21 @@ export default class SDonutComponent extends SWebComponent {
     const $segment = this.getSegmentByName(name)
     // set the animate parameter
     $segment.setAttribute("animate", animate)
+    // maintain chainability
+    return this
+  }
+
+  /**
+   * Set a segment opacity value
+   * @param    {Boolean}    opacity    The opacity to set between 0 and 1
+   * @param    {String}   [name="default"]    The name of the segment to update
+   * @return    {SDonutComponent}    The component itself to maintain chainability
+   */
+  setSegmentOpacity(opacity, name = "default") {
+    // get the segment
+    const $segment = this.getSegmentByName(name)
+    // set the animate parameter
+    $segment.setAttribute("opacity", opacity)
     // maintain chainability
     return this
   }
@@ -258,9 +355,9 @@ export default class SDonutComponent extends SWebComponent {
 
     // construct the initial obj to animate
     const obj = {
-      dashArray0: parseInt(dashArrayAttr ? dashArrayAttr.split(" ")[0] : 0),
-      dashArray1: parseInt(dashArrayAttr ? dashArrayAttr.split(" ")[1] : 0),
-      offset: parseInt(dashOffsetAttr || 25)
+      dashArray0: parseInt(dashArrayAttr ? dashArrayAttr.split(" ")[0] : 0, 10),
+      dashArray1: parseInt(dashArrayAttr ? dashArrayAttr.split(" ")[1] : 0, 10),
+      offset: parseInt(dashOffsetAttr || 25, 10)
     }
 
     if (animate) {
@@ -275,12 +372,12 @@ export default class SDonutComponent extends SWebComponent {
         duration: this.props.animationDuration,
         easing: this.props.animationEasing,
         update: () => {
-          const $segment = this.getSegmentByName(name)
-          $segment.setAttribute(
+          const $seg = this.getSegmentByName(name)
+          $seg.setAttribute(
             "stroke-dasharray",
             `${obj.dashArray0} ${obj.dashArray1}`
           )
-          $segment.setAttribute("stroke-dashoffset", obj.offset)
+          $seg.setAttribute("stroke-dashoffset", obj.offset)
           this._updateSvgFix()
         }
       })
@@ -312,32 +409,30 @@ export default class SDonutComponent extends SWebComponent {
    * Get the stroke width depending on the size of the donut
    * @return    {Number}    The stroke width
    */
-  getStrokeWidth() {
+  _getStrokeWidth(width = null) {
     const sizeRatio = 32 / this.offsetWidth
-    return this.props.strokeWidth * sizeRatio
+    return (width || this.props.strokeWidth) * sizeRatio
   }
 
   /**
    * Resize handler
    * @param    {Event}    e    The resize event
    */
-  _removeResizeHandler(e) {
+  _resizeHandler() {
     // calculate new stroke width
-    const strokeWidth = this.getStrokeWidth()
+    const strokeWidth = this._getStrokeWidth()
     // loop on each segments
     Array.from(this.querySelectorAll("circle[name]"), $segment => {
       // get the name
       const segmentName = $segment.getAttribute("name")
       // apply new stroke width
-      this.setSegmentStrokeWidth(segmentName, strokeWidth)
+      this.setSegmentStrokeWidth(strokeWidth, segmentName)
     })
     // apply the new viewport
     this._$svg.setAttribute(
       "viewBox",
       `0 0 ${32 + strokeWidth} ${32 + strokeWidth}`
     )
-    // fix the render
-    // this._updateSvgFix()
   }
 
   /**
@@ -351,13 +446,18 @@ export default class SDonutComponent extends SWebComponent {
    * Create the HTML structure
    */
   _createHtml() {
-    const strokeWidth = this.getStrokeWidth()
-    const svg = `
+    // wrapp the content of the donut into the donut__content div
+    const $content = document.createElement("div")
+    $content.classList.add(`${this.componentNameDash}__content`)
+    wrapInner(this, $content)
+
+    // create the base svg
+    const strokeWidth = this._getStrokeWidth()
+    const $svg = strToHtml(`
       <svg width="100%" height="100%" viewBox="0 0 ${32 + strokeWidth} ${32 +
       strokeWidth}" version="1.1" baseProfile="full" xmlns="http://www.w3.org/2000/svg"></svg>
-    `
-    this.innerHTML = svg
-
+    `)
+    this.appendChild($svg)
     this._$svg = this.querySelector("svg")
   }
 }

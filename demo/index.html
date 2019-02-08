@@ -4,14 +4,34 @@
     <link rel="stylesheet" href="dist/css/style.css" />
   </head>
   <body>
-    <s-donut segments="[{name:'default',start:0,end:90}]"></s-donut>
+
+    <s-donut id="donut1" segments="[{start:0,end:90}]">
+        <s-characters-slideshow timeout="0" loop="false" values="['90%']" class="donut__value">90%</s-characters-slideshow>
+        <span class="donut__title">Somthing cool</span>
+    </s-donut>
+
+    <s-donut id="donut2" segments="[{start:0,end:90}]"
+      stroke-width="40">
+        <s-characters-slideshow timeout="0" loop="false" values="['90%']" class="donut__value">90%</s-characters-slideshow>
+        <span class="donut__title">Somthing cool</span>
+    </s-donut>
+
+    <s-donut id="donut3" segments="[{start:0,end:90}]"
+      stroke-width="30">
+        <s-characters-slideshow timeout="0" loop="false" values="['90%']" class="donut__value">90%</s-characters-slideshow>
+        <span class="donut__title">Somthing cool</span>
+    </s-donut>
 
     <s-donut
-      cascade
+      id="donut4"
+
       stroke-width="50"
       animation-duration="500"
-      segments="[{name:'default',start:0,end:60,color:'#ff0f00'}, {name:'master',start:60,end:100,color:'#000ff0'}]"
-    ></s-donut>
+      segments="[{name:'1',start:0,end:30,color:'#f2bc2b'}, {name:'2',start:30,end:70,color:'#2b3438'}, {name:'3',start:70,end:100,color:'#848e91'}]"
+    >
+      <span class="donut__value">XX</span>
+      <span class="donut__title">Somthing cool</span>
+    </s-donut>
 
     <script src="dist/js/app.js"></script>
   </body>
